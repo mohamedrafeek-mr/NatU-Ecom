@@ -1,6 +1,6 @@
 # Render will use this command when starting the web service.
-# We point Gunicorn directly at the config package instead of using the
-# old "ecompro" package name, which no longer exists after the
-# restructuring that placed settings and wsgi in `config/`.
+# The project package is now `config`, not `ecompro`.  Point Gunicorn
+# at the correct module and include the callable name explicitly.  Also
+# bind to the port Render provides via $PORT.
 
-web: gunicorn config.wsgi
+web: gunicorn config.wsgi:application --bind 0.0.0.0:$PORT
