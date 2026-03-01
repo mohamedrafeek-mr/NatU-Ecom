@@ -34,6 +34,17 @@ def main():
     if project_root not in sys.path:
         sys.path.insert(1, project_root)
 
+    # When the project directory isn’t literally named ``ecompro`` we must
+    # still make the package importable under that name so that the
+    # rest of the codebase (and any deployment commands) can continue to
+    # refer to ``ecompro.*``.  Mirror the logic used in wsgi.py.
+    if os.path.basename(project_root) != 'ecompro':
+        import types
+        if 'ecompro' not in sys.modules:
+            pkg = types.ModuleType('ecompro')
+            pkg.__path__ = [project_root]
+            sys.modules['ecompro'] = pkg
+
     # Use the standalone config package for settings.
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
     try:

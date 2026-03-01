@@ -20,6 +20,22 @@ parent_dir = os.path.dirname(proj_root)
 if parent_dir not in sys.path:
     sys.path.insert(0, parent_dir)
 
+# The project root directory *is* the ecompro package. When the repository
+# is checked out directly into a directory named "ecompro" this is enough
+# to allow "import ecompro" (parent_dir contains a folder called
+# ``ecompro``).  On Render the clone lands in ``/opt/render/project/src``
+# which isn’t named after the package, so the normal import logic would
+# fail.  To support both cases we create a lightweight module object
+# that points at the project root and register it under the canonical
+# package name.  That lets code elsewhere continue to use
+# ``ecompro.foo`` imports without rewriting everything.
+if os.path.basename(proj_root) != 'ecompro':
+    import types
+    if 'ecompro' not in sys.modules:
+        pkg = types.ModuleType('ecompro')
+        pkg.__path__ = [proj_root]
+        sys.modules['ecompro'] = pkg
+
 from django.core.wsgi import get_wsgi_application
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
