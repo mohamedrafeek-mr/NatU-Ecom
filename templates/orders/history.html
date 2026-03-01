@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}Order History{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-6">Your Orders</h1>
+{% if orders %}
+<table class="w-full bg-white rounded shadow">
+    <thead class="bg-gray-200">
+        <tr>
+            <th class="p-2 text-left">#</th>
+            <th class="p-2 text-left">Status</th>
+            <th class="p-2 text-left">Total</th>
+            <th class="p-2 text-left">Placed</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for order in orders %}
+        <tr class="border-t">
+            <td class="p-2">{{ order.id }}</td>
+            <td class="p-2 capitalize">{{ order.status }}</td>
+            <td class="p-2">
+                {% if order.discount_amount %}
+                    ₹{{ order.total|add:order.discount_amount }}<br>
+                    <small>–{{ order.coupon.code }} ₹{{ order.discount_amount|floatformat:2 }}</small><br>
+                    <strong>₹{{ order.total }}</strong>
+                {% else %}
+                    ₹{{ order.total }}
+                {% endif %}
+            </td>
+            <td class="p-2">{{ order.placed_at|date:'Y-m-d' }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>You have no orders.</p>
+{% endif %}
+{% endblock %}

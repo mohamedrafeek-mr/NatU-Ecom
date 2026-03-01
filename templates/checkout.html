@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}Checkout{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-6">Checkout</h1>
+<form method="post">
+    {% csrf_token %}
+    <!-- login step if needed -->
+    <section class="mb-6">
+        <h2 class="font-semibold">1. Address</h2>
+        <!-- list addresses or address form -->
+        <p>Select your delivery address.</p>
+    </section>
+    <section class="mb-6">
+        <h2 class="font-semibold">2. Order Summary</h2>
+        <!-- show cart items summary -->
+    </section>
+    <section class="mb-6">
+        <h2 class="font-semibold">3. Payment</h2>
+        <label class="block"><input type="radio" name="payment" value="razorpay" checked> Razorpay</label>
+        <label class="block"><input type="radio" name="payment" value="cod"> Cash on delivery</label>
+    </section>
+    <button class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700" type="submit">Place order</button>
+</form>
+{% endblock %}

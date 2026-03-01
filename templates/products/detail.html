@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% block title %}{{ product.name }}{% endblock %}
+{% block content %}
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 bg-white rounded shadow p-6">
+    <!-- image gallery placeholder -->
+    <div class="space-y-4">
+        {% if product.images.exists %}
+            <img src="{{ product.images.all.0.image.url }}" alt="{{ product.name }}" class="w-full rounded">
+            <div class="flex space-x-2">
+                {% for img in product.images.all %}
+                    <img src="{{ img.image.url }}" alt="" class="w-16 h-16 object-cover rounded cursor-pointer">
+                {% endfor %}
+            </div>
+        {% else %}
+            <img src="https://via.placeholder.com/400" alt="{{ product.name }}" class="w-full rounded">
+        {% endif %}
+    </div>
+    <div>
+        <h1 class="text-2xl font-bold mb-2">{{ product.name }}</h1>
+        <p class="text-gray-700 mb-4">{{ product.description|linebreaksbr }}</p>
+        <p class="text-xl font-semibold mb-2">Price: ₹{{ product.sale_price }}
+            {% if product.offer_price %}
+                <span class="text-sm line-through text-gray-500">₹{{ product.price }}</span>
+            {% endif %}
+        </p>
+        <p class="mb-4">Stock: {{ product.stock }}</p>
+        <form action="/cart/add/{{ product.id }}/" method="post" class="flex items-center space-x-2">
+            {% csrf_token %}
+            <input type="number" name="quantity" value="1" min="1" max="{{ product.stock }}" class="w-16 border rounded px-2 py-1">
+            <button class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700" type="submit">Add to cart</button>
+        </form>
+        <form action="/cart/buy/{{ product.id }}/" method="post" class="mt-2">
+            {% csrf_token %}
+            <input type="hidden" name="quantity" value="1">
+            <button class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700" type="submit">Buy now</button>
+        </form>
+
+        <!-- coupon form on product page -->
+        {% if coupon_error %}
+            <p class="text-red-600 mt-2">{{ coupon_error }}</p>
+        {% endif %}
+        {% if coupon_success %}
+            <p class="text-green-600 mt-2">{{ coupon_success }}</p>
+        {% endif %}
+        <form action="{% url 'coupons:apply' %}" method="post" class="mt-4 flex items-center">
+            {% csrf_token %}
+            <input name="code" placeholder="Coupon code" class="border rounded px-2 py-1 mr-2" />
+            <button class="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700" type="submit">Apply</button>
+        </form>    </div>
+</div>
+
+<!-- reviews section -->
+<div class="mt-8">
+    <h2 class="text-xl font-bold mb-2">Reviews</h2>
+    <ul class="space-y-2">
+        {% for review in product.reviews.all %}
+            <li class="border p-2 rounded">
+                <strong>{{ review.rating }} stars</strong> – {{ review.comment }} <em>({{ review.user }})</em>
+            </li>
+        {% empty %}
+            <li>No reviews yet.</li>
+        {% endfor %}
+    </ul>
+</div>
+
+<!-- related products placeholder -->
+<div class="mt-8">
+    <h2 class="text-xl font-bold mb-4">Related Products</h2>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {% if related_products %}
+            {% for rel in related_products %}
+                <div class="bg-white rounded shadow p-4">
+                    <a href="{{ rel.get_absolute_url }}" class="font-semibold">{{ rel.name }}</a>
+                    <p class="text-sm text-gray-600">₹{{ rel.sale_price }}</p>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="bg-white rounded shadow p-4">
+                <p class="text-gray-600">No related products found.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

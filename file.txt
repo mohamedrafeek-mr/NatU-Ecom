@@ -1,0 +1,84 @@
+Project completion steps for Django E‑commerce shop
+
+1. Create project structure
+   - config settings split (dev/prod)
+   - apps: accounts, products, cart, orders, payments, reviews, coupons, dashboard, core
+
+2. Implement accounts app
+   - custom User model (phone/email)
+   - registration, login, logout, password reset
+   - profile, address management
+   - social auth (Google) via django-allauth
+
+3. Build products models
+   - Category (nested), Product, ProductImage
+   - stock, offer_price, featured flags
+   - admin registration and image uploads
+
+4. Implement cart logic
+   - session cart for guests
+   - persistent cart for users
+   - add/update/remove items, cart totals
+
+5. Checkout & orders
+   - checkout workflow (address, summary, payment)
+   - Order and OrderItem models, statuses
+   - invoice generation and order history
+
+6. Payment integration
+   - Razorpay (recommended) + COD fallback
+   - webhook verification, Payment model
+   - update Order.payment_status on success
+
+7. Reviews & ratings
+   - Review model, only buyers can review
+   - Admin moderation & display on product page
+
+8. Coupons & offers
+   - Coupon model with percent/flat discounts
+   - validation, auto-apply rules, first-order logic
+
+9. Shipping & delivery
+   - Delivery charges, free delivery threshold
+   - Pincode validation, estimated delivery times
+   - Order tracking status updates
+
+10. Admin dashboard
+    - Product CRUD, order management, status updates
+    - Sales analytics: daily/monthly, top products
+    - Low-stock alerts and coupon management
+
+11. Search & filters
+    - Full-text search (Postgres SearchVector or Haystack)
+    - Filters: category, price, rating, sort
+
+12. Wishlist & user features
+    - Wishlist model & move-to-cart
+    - Saved addresses, order details, profile edit
+
+13. UI templates & Tailwind
+    - base, navbar, footer, product cards, detail page
+    - Tailwind build & purge for production
+    - Responsive mobile layout & mobile cart action
+
+14. Testing & QA
+    - Unit tests for critical flows (cart, checkout, payments)
+    - Integration tests for end-to-end ordering
+    - Security checks and input validation
+
+15. Deployment & monitoring
+    - PostgreSQL for production
+    - Static/media to S3 (django-storages)
+    - Gunicorn + Nginx, systemd service
+    - HTTPS, environment variables, logging and alerts
+
+Optional advanced features (phase 2):
+- WhatsApp/SMS notifications (Celery)
+- Email invoices and marketing campaigns
+- Subscription products and multi-vendor support
+- Public REST API (Django REST Framework)
+
+Notes:
+- Implement incrementally: finish core flows first (accounts→products→cart→checkout→payments), then add analytics and extras.
+- Keep sensitive keys in environment variables and secure production settings (DEBUG=False).
+

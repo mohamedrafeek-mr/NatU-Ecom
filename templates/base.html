@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <title>{% block title %}Shop{% endblock %}</title>
+    <link rel="shortcut icon" href="{% static 'favicon.png' %}" type="image/x-icon">
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+        <style>
+            /* Global form styles for account pages */
+            .accounts-login-form input[type="text"],
+            .accounts-login-form input[type="password"],
+            .accounts-login-form input[type="email"],
+            .accounts-login-form input[type="search"],
+            .accounts-login-form textarea, .accounts-login-form select {
+                padding: 0.6rem 0.8rem;
+                border-radius: 0.5rem;
+                border: 1px solid #e5e7eb;
+                width: 100%;
+                box-sizing: border-box;
+                background: white;
+                color: #111827;
+            }
+            .accounts-login-form label {
+                display: block;
+                margin-bottom: 0.25rem;
+                color: #374151;
+                font-size: 0.9rem;
+            }
+            .google-btn svg { width: 18px; height: 18px; }
+        </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+<header class="sticky top-0 z-50 bg-white shadow">
+    <!-- top bar: logo, search, auth/cart -->
+    <div class="border-b">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center">
+                {% load static %}
+                <a href="/" class="text-2xl font-bold text-red-800">
+                    <img src="{% static 'logo.png' %}" alt="Site logo" class="h-8 w-auto">
+                </a>
+            </div>
+            <div class="flex-1 mx-4">
+                <form action="/products/" method="get" class="relative">
+                    <input type="text" name="q" id="search-input" list="search-suggestions" placeholder="Search products"
+                           class="w-full border rounded-full py-2 px-4 focus:outline-none focus:border-red-500" autocomplete="off" />
+                    <datalist id="search-suggestions"></datalist>
+                    <button type="submit" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500">
+                        🔍
+                    </button>
+                </form>
+            </div>
+            <div class="flex items-center space-x-4">
+                {% if user.is_authenticated %}
+                    <a href="/accounts/profile/" class="text-gray-700 hover:text-red-600">👤</a>
+                    <a href="{% url 'orders:history' %}" class="ml-2 text-gray-700 hover:text-red-600">My Orders</a>
+                    <form method="post" action="{% url 'account_logout' %}" class="inline">
+                        {% csrf_token %}
+                        <button type="submit" class="text-gray-700 hover:text-red-600 bg-transparent">Logout</button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'account_login' %}" class="text-gray-700 hover:text-red-600">Login</a>
+                {% endif %}
+                <a href="/cart/" class="text-gray-700 hover:text-red-600 relative">
+                    🛒
+                    <span class="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full px-1">{{ cart_count|default:0 }}</span>
+                </a>
+            </div>
+        </div>
+    </div>
+    <!-- navigation menu -->
+    <div class="bg-red-800">
+        <div class="container mx-auto px-4">
+            <nav class="flex items-center justify-between py-2 text-white">
+                <div class="flex items-center space-x-6">
+                    <div class="relative" id="category-dropdown">
+                        <button id="category-toggle" class="flex items-center focus:outline-none">
+                            <span>Browse All Categories</span>
+                            <svg class="w-4 h-4 ml-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path id="category-chevron" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        <!-- dropdown: list all top-level categories and their children -->
+                        <div id="category-menu" class="absolute left-0 mt-2 w-48 bg-white text-gray-800 rounded shadow-lg hidden max-h-64 overflow-auto">
+                            {% for cat in all_categories %}
+                                <div class="group relative">
+                                    <a href="{{ cat.get_absolute_url }}" class="block px-4 py-2 hover:bg-gray-200 focus:bg-gray-200 {% if cat.selected %}bg-gray-300 font-semibold{% endif %}">
+                                        {{ cat.name }}
+                                    </a>
+                                    {% if cat.children.exists %}
+                                        <div class="absolute left-full top-0 ml-1 w-48 bg-white text-gray-800 rounded shadow-lg hidden group-hover:block">
+                                            {% for child in cat.children.all %}
+                                                <a href="{{ child.get_absolute_url }}" class="block px-4 py-2 hover:bg-gray-200 focus:bg-gray-200 {% if child.selected %}bg-gray-300 font-semibold{% endif %}">
+                                                    {{ child.name }}
+                                                </a>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            {% empty %}
+                                <span class="block px-4 py-2 text-gray-500">No categories</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <a href="/" class="hover:underline {% if request.path == '/' %}underline{% endif %}">Home</a>
+                    <a href="/about/" class="hover:underline {% if request.path == '/about/' %}underline{% endif %}">About Us</a>
+                    <a href="/products/" class="hover:underline {% if request.path|slice:":9" == "/products" %}underline{% endif %}">Products</a>
+                    <a href="/contact/" class="hover:underline {% if request.path == '/contact/' %}underline{% endif %}">Contact</a>
+                </div>
+                <div class="hidden md:block">
+                    <span>Support: +91 xxxxx xxxxx</span>
+                </div>
+                <!-- mobile menu button -->
+                <div class="md:hidden">
+                    <button id="mobile-menu-button">☰</button>
+                </div>
+            </nav>
+            <!-- mobile menu items -->
+            <div class="mobile-menu hidden bg-red-800 text-white px-4 py-2 md:hidden">
+                <a href="/" class="block py-1 hover:underline">Home</a>
+                <a href="/about/" class="block py-1 hover:underline">About Us</a>
+                <a href="/products/" class="block py-1 hover:underline">Products</a>
+                <a href="/contact/" class="block py-1 hover:underline">Contact</a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'orders:history' %}" class="block py-1 hover:underline">My Orders</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</header>
+<main class="container mx-auto px-4 py-6">
+    {% block content %}{% endblock %}
+</main>
+<footer class="bg-white border-t mt-8">
+    <div class="container mx-auto px-4 py-12 grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div>
+            <h3 class="font-bold text-lg">My Shop</h3>
+            <p class="text-gray-600 mt-2">Traditional organic groceries & sweets.</p>
+        </div>
+        <div>
+            <h3 class="font-semibold">Quick links</h3>
+            <ul class="mt-2 space-y-1">
+                <li><a href="/" class="hover:underline">Home</a></li>
+                <li><a href="/products/" class="hover:underline">Products</a></li>
+                <li><a href="/contact/" class="hover:underline">Contact</a></li>
+            </ul>
+        </div>
+        <div>
+            <h3 class="font-semibold">Categories</h3>
+            <ul class="mt-2 space-y-1">
+                <li><a href="#" class="hover:underline">Rice &amp; millets</a></li>
+                <li><a href="#" class="hover:underline">Oils</a></li>
+                <li><a href="#" class="hover:underline">Sweets</a></li>
+            </ul>
+        </div>
+        <div>
+            <h3 class="font-semibold">Contact</h3>
+            <p class="mt-2">Phone: +91 xxxxx xxxxx</p>
+            <p>Email: support@example.com</p>
+            <div class="mt-2 flex space-x-2">
+                <a href="#" class="text-gray-600 hover:text-gray-800">🐦</a>
+                <a href="#" class="text-gray-600 hover:text-gray-800">📘</a>
+                <a href="#" class="text-gray-600 hover:text-gray-800">📸</a>
+            </div>
+        </div>
+    </div>
+    <div class="bg-gray-100 py-4">
+        <div class="container mx-auto px-4 text-center text-sm text-gray-600">
+            © 2026 My Shop. All rights reserved.
+        </div>
+    </div>
+</footer>
+    <!-- floating widgets -->
+    <a href="https://wa.me/919999999999" target="_blank" class="fixed bottom-24 right-6 bg-green-500 text-white p-4 rounded-full shadow-lg hover:bg-green-600">
+        💬
+    </a>
+    <a href="/cart/" class="fixed bottom-6 right-6 bg-red-600 text-white p-4 rounded-full shadow-lg hover:bg-red-700">
+        🛒
+    </a>
+    <script>
+        const btn = document.getElementById('mobile-menu-button');
+        btn && btn.addEventListener('click', ()=>{
+            const nav = btn.closest('nav');
+            const items = nav.querySelector('.mobile-menu');
+            if(items) items.classList.toggle('hidden');
+        });
+    </script>
+    <script>
+        // live suggestion for search box
+        document.addEventListener('DOMContentLoaded', () => {
+            const input = document.getElementById('search-input');
+            const list = document.getElementById('search-suggestions');
+            let controller;
+            if (!input || !list) return;
+            input.addEventListener('input', function () {
+                const q = this.value.trim();
+                if (controller) controller.abort();
+                if (q.length < 2) {
+                    list.innerHTML = '';
+                    return;
+                }
+                controller = new AbortController();
+                fetch(`/products/autocomplete/?q=${encodeURIComponent(q)}`, {signal: controller.signal})
+                    .then(res => res.json())
+                    .then(data => {
+                        list.innerHTML = '';
+                        data.suggestions.forEach(item => {
+                            const opt = document.createElement('option');
+                            opt.value = item;
+                            list.appendChild(opt);
+                        });
+                    });
+            });
+        });
+
+        // toggle category dropdown on click and close when clicking outside
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggle = document.getElementById('category-toggle');
+            const menu = document.getElementById('category-menu');
+            const chevron = document.getElementById('category-chevron');
+            if (toggle && menu && chevron) {
+                toggle.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const open = !menu.classList.contains('hidden');
+                    menu.classList.toggle('hidden', open);
+                    chevron.style.transform = open ? '' : 'rotate(180deg)';
+                });
+                document.addEventListener('click', (e) => {
+                    if (!toggle.contains(e.target) && !menu.contains(e.target)) {
+                        if (!menu.classList.contains('hidden')) {
+                            menu.classList.add('hidden');
+                            chevron.style.transform = '';
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

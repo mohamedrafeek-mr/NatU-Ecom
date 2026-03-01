@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<!-- hero slider -->
+<div class="relative mb-8">
+    <div class="overflow-hidden rounded-lg">
+        <!-- slide 1 -->
+<div class="relative h-96 overflow-hidden">
+            <img src="{% static 'banner.png' %}" alt="" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+                <div class="text-center text-white px-4">
+                    <h2 class="text-3xl font-bold">Traditionals Sweets</h2>
+                    <p class="mt-2">Festival Offer - Up to 50% off</p>
+                    <a href="/products/" class="mt-4 inline-block bg-red-600 px-6 py-2 rounded hover:bg-red-700">Shop Now</a>
+                </div>
+            </div>
+        </div>
+        <!-- additional slides would be positioned similarly and controlled with JS in full implementation -->
+    </div>
+</div>
+
+<h1 class="text-3xl font-bold mb-6">Welcome to our Shop</h1>
+<!-- featured products display; removed Top Picks as requested -->
+<section class="mb-8">
+    <h2 class="text-2xl font-semibold mb-4">Featured</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {% for p in featured %}
+            <div class="bg-white rounded shadow p-4 text-center">
+                {% if p.images.exists %}
+                    <a href="{{ p.get_absolute_url }}">
+                        <img src="{{ p.images.all.0.image.url }}" alt="{{ p.name }}" class="mx-auto mb-2 h-32 object-contain">
+                    </a>
+                {% else %}
+                    <a href="{{ p.get_absolute_url }}">
+                        <img src="https://via.placeholder.com/150" alt="{{ p.name }}" class="mx-auto mb-2 h-32 object-contain">
+                    </a>
+                {% endif %}
+                <a href="{{ p.get_absolute_url }}" class="text-red-600 font-medium block">{{ p.name }}</a>
+                <p class="text-gray-700">₹{{ p.sale_price }}</p>
+            </div>
+        {% empty %}
+            <p>No featured products.</p>
+        {% endfor %}
+    </div>
+</section>
+<section>
+    <h2 class="text-2xl font-semibold mb-4">Categories</h2>
+    <div class="flex flex-wrap gap-4">
+        {% for cat in categories %}
+            <a href="{{ cat.get_absolute_url }}" class="bg-indigo-100 text-indigo-800 px-3 py-1 rounded">{{ cat.name }}</a>
+        {% empty %}
+            <p>No categories.</p>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Sign In Via Google | Shop{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-center min-h-[80vh] bg-gray-100">
+  <div class="w-full max-w-lg bg-white rounded-lg shadow-lg p-10">
+    <h2 class="text-3xl font-bold text-center text-red-800 mb-6">Sign In Via Google</h2>
+    <p class="text-center text-gray-700 mb-8">You are about to sign in using a third-party account from Google.</p>
+    <form method="post" action="">
+      {% csrf_token %}
+      <button type="submit" class="w-full bg-red-700 hover:bg-red-800 text-white font-semibold py-3 px-4 rounded transition text-lg">Continue</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
